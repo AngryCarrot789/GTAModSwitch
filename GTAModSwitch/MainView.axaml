@@ -1,0 +1,73 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="200"
+             x:Class="GTAModSwitch.MainView"
+             Background="{DynamicResource ABrush.Tone4.Background.Static}">
+    <Grid Margin="10" RowDefinitions="Auto,Auto,10,Auto,Auto,10,*,10,Auto" ColumnDefinitions="*,5,Auto">
+        <TextBlock Grid.Column="0" Grid.Row="0" Text="GTA Directory" Padding="4,4"/>
+        <TextBox Grid.Column="0" Grid.Row="1" Padding="3,4"
+                 TextChanged="OnTextChangedOnDirTextBox"
+                 Background="{DynamicResource ABrush.Tone2.Background.Static}"
+                 x:Name="PART_GtaDir"
+                 ToolTip.Tip="The folder that GTA is installed in. This will contain things like update, x64, etc."/>
+        
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Your Mods Directory" Padding="4,4"/>
+        <TextBox Grid.Column="0" Grid.Row="4" Padding="4,4"
+                 Background="{DynamicResource ABrush.Tone2.Background.Static}"
+                 TextChanged="OnTextChangedOnDirTextBox"
+                 x:Name="PART_ModsDir"
+                 ToolTip.Tip="The folder that contains all files and folders that are to be moved between the GTA dir when you click Load or Unload"/>
+
+        <Button x:Name="PART_BrowseGtaDirButton" Content="..." Grid.Column="2" Grid.Row="1" Width="24"
+                ToolTip.Tip="Click to browse for your GTA install directory"/>
+        <Button x:Name="PART_BrowseModsDirButton" Content="..." Grid.Column="2" Grid.Row="4" Width="24"
+                ToolTip.Tip="Click to browse for your mods folder"/>
+        
+        <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6"
+              ColumnDefinitions="*,10,*">
+            <Button x:Name="PART_LoadModsButton" Content="Load Mods" Grid.Column="0">
+                <ToolTip.Tip>
+                    <TextBlock>
+                        <Run Text="Moves all files and folders from your MODS folder into the GTA directory." FontWeight="Bold"/>
+                        <LineBreak/>
+                        <Run Text="If overwrite selected, any existing GTA file or directory is replaced with the one in the mods folder"/>
+                        <LineBreak/>
+                        <Run Text="Otherwise, those specific files and directories will not be copied"/>
+                    </TextBlock>
+                </ToolTip.Tip>
+            </Button>
+            <Button x:Name="PART_UnloadModsButton" Content="Unload Mods" Grid.Column="2">
+                <ToolTip.Tip>
+                    <TextBlock>
+                        <Run Text="Moves the files and folders that were originally in your MODS folder back into your MODS folder." FontWeight="Bold"/>
+                        <LineBreak/>
+                        <Run Text="If overwrite selected, the existing mod files and folders in the GTA dir can overwrite the ones in your MODS folder."/>
+                        <LineBreak/>
+                        <Run Text="Otherwise, they will remain in the GTA directory and those specific files and folders in your mods folder will be unaffected"/>
+                    </TextBlock>
+                </ToolTip.Tip>
+            </Button>
+        </Grid>
+        
+        <CheckBox x:Name="PART_OverwriteOrIgnoreCheckBox" 
+                  Content="MainView not loaded"
+                  Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="8" 
+                  IsCheckedChanged="PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged">
+            <ToolTip.Tip>
+                <TextBlock>
+                    <Run Text="The text currently displayed is what the action is!" FontWeight="Bold"/>
+                    <LineBreak/>
+                    <Run Text="You can toggle this between:"/>
+                    <LineBreak/>
+                    <Run Text="  - Overwrite existing files (in GTA dir) when loading and overwriting existing files in MODS dir when unloading"/>
+                    <LineBreak/>
+                    <Run Text="  - Ignoring existing files in GTA dir and MODS dir."/>
+                    <LineBreak/>
+                    <Run Text="You can change this any time, even after loading."/>
+                </TextBlock>
+            </ToolTip.Tip>
+        </CheckBox>
+    </Grid>
+</UserControl>

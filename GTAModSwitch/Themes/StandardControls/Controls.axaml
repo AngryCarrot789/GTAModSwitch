@@ -1,0 +1,37 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- This file contains all of the standard control styles/control themes -->
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source="ScrollViewer.axaml"/>
+                <MergeResourceInclude Source="ScrollBar.axaml"/>
+                <MergeResourceInclude Source="TextBlock.axaml"/>
+                <MergeResourceInclude Source="Button.axaml"/>
+                <MergeResourceInclude Source="RepeatButton.axaml"/>
+                <MergeResourceInclude Source="ToggleButton.axaml"/>
+                <MergeResourceInclude Source="ButtonSpinner.axaml"/>
+                <MergeResourceInclude Source="GroupBox.axaml"/>
+                <MergeResourceInclude Source="ListBox.axaml"/>
+                <MergeResourceInclude Source="ListBoxItem.axaml"/>
+                <MergeResourceInclude Source="Slider.axaml"/>
+                <MergeResourceInclude Source="TreeView.axaml"/>
+                <MergeResourceInclude Source="TreeViewItem.axaml"/>
+                <MergeResourceInclude Source="CheckBox.axaml"/>
+                <MergeResourceInclude Source="RadioButton.axaml"/>
+                <MergeResourceInclude Source="Separator.axaml"/>
+                <MergeResourceInclude Source="TabControl.axaml"/>
+                <MergeResourceInclude Source="TabItem.axaml"/>
+                <MergeResourceInclude Source="GridSplitter.axaml"/>
+                <MergeResourceInclude Source="TextBox.axaml"/>
+                <MergeResourceInclude Source="ComboBox.axaml"/>
+                <MergeResourceInclude Source="ComboBoxItem.axaml"/>
+                <MergeResourceInclude Source="ProgressBar.axaml"/>
+                <MergeResourceInclude Source="Menu.axaml"/>
+                <MergeResourceInclude Source="MenuItem.axaml"/>
+                <MergeResourceInclude Source="MenuFlyoutPresenter.axaml"/>
+                <MergeResourceInclude Source="Window.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+</Styles>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="GTAModSwitch/App.axaml" value="GTAModSwitch/GTAModSwitch.csproj" />
+        <entry key="GTAModSwitch/MainView.axaml" value="GTAModSwitch/GTAModSwitch.csproj" />
+        <entry key="GTAModSwitch/MainWindow.axaml" value="GTAModSwitch/GTAModSwitch.csproj" />
+        <entry key="GTAModSwitch/Themes/Colours/SoftDark.axaml" value="GTAModSwitch/GTAModSwitch.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
