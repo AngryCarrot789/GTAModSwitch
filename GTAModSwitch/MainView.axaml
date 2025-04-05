@@ -2,9 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="350" d:DesignHeight="200"
+             mc:Ignorable="d" Width="450" Height="200"
              x:Class="GTAModSwitch.MainView"
-             Background="{DynamicResource ABrush.Tone4.Background.Static}">
+             Background="{DynamicResource ABrush.Tone4.Background.Static}"
+             FontFamily="{StaticResource FontOxanium}">
     <Grid Margin="10" RowDefinitions="Auto,Auto,10,Auto,Auto,10,*,10,Auto" ColumnDefinitions="*,5,Auto">
         <TextBlock Grid.Column="0" Grid.Row="0" Text="GTA Directory" Padding="4,4"/>
         <TextBox Grid.Column="0" Grid.Row="1" Padding="3,4"
