@@ -26,4 +26,37 @@
         <HintPath>deps\PFXToolKitUI.Avalonia.dll</HintPath>
       </Reference>
     </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Themes\Colours\SoftDark.axaml" />
+      <UpToDateCheckInput Remove="Themes\ControlColours.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Button.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ButtonSpinner.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\CheckBox.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ComboBox.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ComboBoxItem.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Controls.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\GridSplitter.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\GroupBox.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ListBox.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ListBoxItem.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Menu.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\MenuFlyoutPresenter.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\MenuItem.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ProgressBar.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\RadioButton.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\RepeatButton.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ScrollBar.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ScrollViewer.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Separator.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Slider.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TabControl.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TabItem.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TextBlock.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TextBox.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\ToggleButton.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TreeView.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\TreeViewItem.axaml" />
+      <UpToDateCheckInput Remove="Themes\StandardControls\Window.axaml" />
+    </ItemGroup>
 </Project>

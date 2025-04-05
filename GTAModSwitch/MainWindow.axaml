@@ -1,11 +1,18 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GTAModSwitch"
-        mc:Ignorable="d"
-        Width="350" Height="200"
-        x:Class="GTAModSwitch.MainWindow"
-        Title="GTA Mod Switcher v1.1">
+<c:WindowEx x:Class="GTAModSwitch.MainWindow" 
+            xmlns="https://github.com/avaloniaui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:local="clr-namespace:GTAModSwitch"
+            xmlns:c="clr-namespace:PFXToolKitUI.Avalonia.Themes.Controls;assembly=PFXToolKitUI.Avalonia"
+            mc:Ignorable="d"
+            Width="450" Height="240"
+            Title="GTA Mod Switcher v1.1"
+            CanResize="False"
+            Background="{DynamicResource PanelBackground0}"
+            BorderBrush="{DynamicResource PanelBorderBrush}"
+            TitleBarBrush="{DynamicResource ABrush.Tone7.Background.Static}"
+            FontFamily="{StaticResource FontOxanium}" FontWeight="Medium"
+            WindowStartupLocation="CenterScreen">
     <local:MainView/>
-</Window>
+</c:WindowEx>
