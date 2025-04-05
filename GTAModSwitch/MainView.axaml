@@ -12,7 +12,7 @@
                  Background="{DynamicResource ABrush.Tone2.Background.Static}"
                  x:Name="PART_GtaDir"
                  ToolTip.Tip="The folder that GTA is installed in. This will contain things like update, x64, etc."/>
-        
+
         <TextBlock Grid.Column="0" Grid.Row="3" Text="Your Mods Directory" Padding="4,4"/>
         <TextBox Grid.Column="0" Grid.Row="4" Padding="4,4"
                  Background="{DynamicResource ABrush.Tone2.Background.Static}"
@@ -24,7 +24,7 @@
                 ToolTip.Tip="Click to browse for your GTA install directory"/>
         <Button x:Name="PART_BrowseModsDirButton" Content="..." Grid.Column="2" Grid.Row="4" Width="24"
                 ToolTip.Tip="Click to browse for your mods folder"/>
-        
+
         <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6"
               ColumnDefinitions="*,10,*">
             <Button x:Name="PART_LoadModsButton" Content="Load Mods" Grid.Column="0">
@@ -50,10 +50,10 @@
                 </ToolTip.Tip>
             </Button>
         </Grid>
-        
-        <CheckBox x:Name="PART_OverwriteOrIgnoreCheckBox" 
+
+        <CheckBox x:Name="PART_OverwriteOrIgnoreCheckBox"
                   Content="MainView not loaded"
-                  Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="8" 
+                  Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="8"
                   IsCheckedChanged="PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged">
             <ToolTip.Tip>
                 <TextBlock>

@@ -52,7 +52,7 @@
             <Setter Property="BorderBrush" Value="{DynamicResource ToggleButton.Pressed.IsChecked.Border}"/>
         </Style>
     </ControlTheme>
-    
+
     <ControlTheme x:Key="NoCheckUncheckBrushes" TargetType="{x:Type ToggleButton}">
         <Setter Property="Background" Value="{DynamicResource Button.Static.Background}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource Button.Static.Border}"/>

@@ -5,12 +5,10 @@ using Avalonia.Data.Converters;
 
 namespace GTAModSwitch.Themes.Converters;
 
-public class GroupBoxGapToThicknessConverter : IValueConverter
-{
+public class GroupBoxGapToThicknessConverter : IValueConverter {
     public static GroupBoxGapToThicknessConverter Instance { get; } = new GroupBoxGapToThicknessConverter();
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value == AvaloniaProperty.UnsetValue)
             return value;
 
@@ -20,8 +18,7 @@ public class GroupBoxGapToThicknessConverter : IValueConverter
         return new Thickness(0, 0, 0, gap);
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value == AvaloniaProperty.UnsetValue)
             return value;
 

@@ -5,12 +5,10 @@ using Avalonia.Media;
 
 namespace GTAModSwitch.Themes.Controls;
 
-public class WindowEx : Window
-{
+public class WindowEx : Window {
     public static readonly StyledProperty<IBrush> TitleBarBrushProperty = AvaloniaProperty.Register<WindowEx, IBrush>("TitleBarBrush");
 
-    public IBrush TitleBarBrush
-    {
+    public IBrush TitleBarBrush {
         get => this.GetValue(TitleBarBrushProperty);
         set => this.SetValue(TitleBarBrushProperty, value);
     }
@@ -18,12 +16,10 @@ public class WindowEx : Window
     // Override it here so that any window using WindowEx gets the automatic WindowEx style
     protected override Type StyleKeyOverride => typeof(WindowEx);
 
-    public WindowEx()
-    {
+    public WindowEx() {
     }
 
-    static WindowEx()
-    {
+    static WindowEx() {
         // Window.ShowActivatedProperty
     }
 }

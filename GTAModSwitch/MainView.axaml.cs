@@ -12,16 +12,14 @@ using GTAModSwitch.Commands;
 
 namespace GTAModSwitch;
 
-public partial class MainView : UserControl
-{
+public partial class MainView : UserControl {
     private readonly AsyncRelayCommand browseGtaDirCommand;
     private readonly AsyncRelayCommand browseModsFolderCommand;
     private readonly AsyncRelayCommand loadModsCommand;
     private readonly AsyncRelayCommand unloadModsCommand;
     private List<(string Path, bool DidNotMove)>? loadedModPaths;
 
-    public MainView()
-    {
+    public MainView() {
         this.InitializeComponent();
 
         this.browseGtaDirCommand = new AsyncRelayCommand(this.BrowseGtaDirAsync);
@@ -33,18 +31,26 @@ public partial class MainView : UserControl
         this.Loaded += OnLoadedMainView;
 
         this.UpdateCheckBoxText();
-        this.PART_OverwriteOrIgnoreCheckBox.IsChecked = true;
+        this.PART_OverwriteOrIgnoreCheckBox.IsChecked = BasicAppConfigOptions.Instance.OverwriteOrIgnore;
+        this.PART_GtaDir.Text = BasicAppConfigOptions.Instance.GtaDir;
+        this.PART_ModsDir.Text = BasicAppConfigOptions.Instance.GtaModsDir;
+        
+        this.PART_GtaDir.TextChanged += (sender, args) => {
+            BasicAppConfigOptions.Instance.GtaDir = ((TextBox) sender!).Text ?? "";
+        };
+        
+        this.PART_ModsDir.TextChanged += (sender, args) => {
+            BasicAppConfigOptions.Instance.GtaModsDir = ((TextBox) sender!).Text ?? "";
+        };
 
         return;
 
-        void OnLoadedMainView(object? sender, RoutedEventArgs e)
-        {
+        void OnLoadedMainView(object? sender, RoutedEventArgs e) {
             this.Loaded -= OnLoadedMainView;
 
             bool canOpenFolder = Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
             this.PART_BrowseGtaDirButton.IsEnabled = this.PART_BrowseModsDirButton.IsEnabled = canOpenFolder;
-            if (canOpenFolder)
-            {
+            if (canOpenFolder) {
                 this.PART_BrowseGtaDirButton.Command = this.browseGtaDirCommand;
                 this.PART_BrowseModsDirButton.Command = this.browseModsFolderCommand;
             }
@@ -54,29 +60,28 @@ public partial class MainView : UserControl
         }
     }
 
-    private void UpdateCheckBoxText()
-    {
+    private void UpdateCheckBoxText() {
         bool isChecked = this.PART_OverwriteOrIgnoreCheckBox.IsChecked ?? false;
-
-        this.PART_OverwriteOrIgnoreCheckBox.Content = isChecked ? "Overwrite existing files" : "Ignore existing files";
+        this.PART_OverwriteOrIgnoreCheckBox.Content = isChecked ? "Mode: overwrite existing files" : "Mode: ignore existing files";
     }
 
     private bool DoGtaAndModsDirsExist() => Directory.Exists(this.PART_GtaDir.Text) && Directory.Exists(this.PART_ModsDir.Text);
 
-    private async Task BrowseGtaDirAsync()
-    {
-        if (await BrowseFolder(this.PART_GtaDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path)
+    private async Task BrowseGtaDirAsync() {
+        if (await BrowseFolder(this.PART_GtaDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path) {
             this.PART_GtaDir.Text = path;
+            BasicAppConfigOptions.Instance.StorageManager.SaveArea(BasicAppConfigOptions.Instance);
+        }
     }
 
-    private async Task BrowseModsDirAsync()
-    {
-        if (await BrowseFolder(this.PART_ModsDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path)
+    private async Task BrowseModsDirAsync() {
+        if (await BrowseFolder(this.PART_ModsDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path) {
             this.PART_ModsDir.Text = path;
+            BasicAppConfigOptions.Instance.StorageManager.SaveArea(BasicAppConfigOptions.Instance);
+        }
     }
 
-    private static async Task<IStorageFolder?> BrowseFolder(string? initialDir)
-    {
+    private static async Task<IStorageFolder?> BrowseFolder(string? initialDir) {
         if (!(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop))
             return null;
 
@@ -85,12 +90,10 @@ public partial class MainView : UserControl
             return null;
 
         IStorageFolder? initialFolder = null;
-        try
-        {
+        try {
             initialFolder = !string.IsNullOrWhiteSpace(initialDir) ? await storage.TryGetFolderFromPathAsync(initialDir) : null;
         }
-        catch
-        {
+        catch {
             // ignored
         }
 
@@ -98,10 +101,8 @@ public partial class MainView : UserControl
         return list.Count == 1 ? list[0] : null;
     }
 
-    private async Task LoadModsAsync()
-    {
-        if (this.loadedModPaths != null || !this.DoGtaAndModsDirsExist())
-        {
+    private async Task LoadModsAsync() {
+        if (this.loadedModPaths != null || !this.DoGtaAndModsDirsExist()) {
             this.RaiseCanLoadUnloadExecute();
             return;
         }
@@ -118,16 +119,13 @@ public partial class MainView : UserControl
 
         List<(string Path, bool DidNotMove)>? paths = new List<(string, bool)>();
 
-        foreach (FileSystemInfo info in new DirectoryInfo(modsDir).EnumerateFileSystemInfos())
-        {
+        foreach (FileSystemInfo info in new DirectoryInfo(modsDir).EnumerateFileSystemInfos()) {
             string pathInGtaDir = Path.Combine(gtaDir, info.Name);
-            if (info is FileInfo fileInfo)
-            {
+            if (info is FileInfo fileInfo) {
                 if (MoveFile(fileInfo, pathInGtaDir, overwriteElseIgnore, out bool notMoved))
                     paths.Add((pathInGtaDir, notMoved));
             }
-            else
-            {
+            else {
                 DirectoryInfo dirInfo = (DirectoryInfo) info;
                 if (MoveDir(dirInfo, pathInGtaDir, overwriteElseIgnore, out bool notMoved))
                     paths.Add((pathInGtaDir, notMoved));
@@ -137,11 +135,9 @@ public partial class MainView : UserControl
         this.SetLoadedMods(paths);
     }
 
-    private async Task UnloadModsAsync()
-    {
+    private async Task UnloadModsAsync() {
         List<(string Path, bool DidNotMove)>? filesInModsFolder = this.loadedModPaths;
-        if (filesInModsFolder == null || !Directory.Exists(this.PART_ModsDir.Text))
-        {
+        if (filesInModsFolder == null || !Directory.Exists(this.PART_ModsDir.Text)) {
             this.RaiseCanLoadUnloadExecute();
             return;
         }
@@ -152,30 +148,24 @@ public partial class MainView : UserControl
         bool overwriteElseIgnore = this.PART_OverwriteOrIgnoreCheckBox.IsChecked ?? false;
 
         // Avalonia is pretty shit so no simple way to show errors yet. Would be List<(string, Exception)> for simplicity, string being full path
-        foreach ((string pathInGtaDir, bool didNotMove) in filesInModsFolder)
-        {
+        foreach ((string pathInGtaDir, bool didNotMove) in filesInModsFolder) {
             string fileName = Path.GetFileName(pathInGtaDir);
             string pathInModsDir = Path.Combine(modsDir, fileName);
-            if (File.Exists(pathInGtaDir))
-            {
+            if (File.Exists(pathInGtaDir)) {
                 MoveFile(pathInGtaDir, pathInModsDir, overwriteElseIgnore, out _);
             }
-            else if (Directory.Exists(pathInGtaDir))
-            {
+            else if (Directory.Exists(pathInGtaDir)) {
                 MoveDir(pathInGtaDir, pathInModsDir, overwriteElseIgnore, out _);
             }
         }
-        
+
         this.SetLoadedMods(null);
     }
 
-    private static bool MoveFile(string src, string dst, bool overwrite, out bool didNotMove)
-    {
-        try
-        {
+    private static bool MoveFile(string src, string dst, bool overwrite, out bool didNotMove) {
+        try {
             // Console.WriteLine($"Moving FILE '{src}' --> '{dst}'");
-            if (File.Exists(dst) && !overwrite)
-            {
+            if (File.Exists(dst) && !overwrite) {
                 didNotMove = true;
                 return true;
             }
@@ -184,8 +174,7 @@ public partial class MainView : UserControl
             didNotMove = false;
             return true;
         }
-        catch
-        {
+        catch {
             /* ignored */
             didNotMove = false;
             return false;
@@ -194,39 +183,31 @@ public partial class MainView : UserControl
 
     private static bool MoveFile(FileInfo src, string dst, bool overwrite, out bool didNotMove) => MoveFile(src.FullName, dst, overwrite, out didNotMove);
 
-    private static bool MoveDir(string src, string dst, bool overwrite, out bool didNotMove)
-    {
-        if (Directory.Exists(dst))
-        {
-            if (overwrite)
-            {
-                try
-                {
+    private static bool MoveDir(string src, string dst, bool overwrite, out bool didNotMove) {
+        if (Directory.Exists(dst)) {
+            if (overwrite) {
+                try {
                     // Console.WriteLine($"Trying to delete directory for overwrite: '{dst}'");
                     Directory.Delete(dst);
                 }
-                catch
-                {
+                catch {
                     didNotMove = false;
                     return false;
                 }
             }
-            else
-            {
+            else {
                 didNotMove = true;
                 return true;
             }
         }
 
-        try
-        {
+        try {
             // Console.WriteLine($"Moving DIR '{src}' --> '{dst}'");
             Directory.Move(src, dst);
             didNotMove = false;
             return true;
         }
-        catch
-        {
+        catch {
             /* ignored */
             didNotMove = false;
             return false;
@@ -235,8 +216,7 @@ public partial class MainView : UserControl
 
     private static bool MoveDir(DirectoryInfo src, string dst, bool overwrite, out bool didNotMove) => MoveDir(src.FullName, dst, overwrite, out didNotMove);
 
-    private void SetLoadedMods(List<(string Path, bool DidNotMove)>? paths)
-    {
+    private void SetLoadedMods(List<(string Path, bool DidNotMove)>? paths) {
         if (paths != null && this.loadedModPaths != null)
             throw new InvalidOperationException("Mod paths already loaded");
 
@@ -244,18 +224,16 @@ public partial class MainView : UserControl
         this.RaiseCanLoadUnloadExecute();
     }
 
-    private void PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
-    {
+    private void PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged(object? sender, RoutedEventArgs e) {
         this.UpdateCheckBoxText();
+        BasicAppConfigOptions.Instance.OverwriteOrIgnore = ((CheckBox) sender!).IsChecked ?? false;
     }
 
-    private void OnTextChangedOnDirTextBox(object? sender, TextChangedEventArgs e)
-    {
+    private void OnTextChangedOnDirTextBox(object? sender, TextChangedEventArgs e) {
         this.RaiseCanLoadUnloadExecute();
     }
 
-    private void RaiseCanLoadUnloadExecute()
-    {
+    private void RaiseCanLoadUnloadExecute() {
         this.loadModsCommand.RaiseCanExecuteChanged();
         this.unloadModsCommand.RaiseCanExecuteChanged();
     }
