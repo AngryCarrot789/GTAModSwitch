@@ -54,8 +54,7 @@
 
         <CheckBox x:Name="PART_OverwriteOrIgnoreCheckBox"
                   Content="MainView not loaded"
-                  Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="8"
-                  IsCheckedChanged="PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged">
+                  Grid.ColumnSpan="3" Grid.Column="0" Grid.Row="8">
             <ToolTip.Tip>
                 <TextBlock>
                     <Run Text="The text currently displayed is what the action is!" FontWeight="Bold"/>

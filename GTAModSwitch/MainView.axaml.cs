@@ -1,47 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
-using GTAModSwitch.Commands;
+using PFXToolKitUI.Avalonia.Bindings;
+using PFXToolKitUI.Utils.Commands;
 
 namespace GTAModSwitch;
 
 public partial class MainView : UserControl {
+    public ModSwitchManager ModSwitchManager { get; } = new ModSwitchManager();
+    
+    private readonly AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration> gtaDirBinder = new AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration>(TextBox.TextProperty, nameof(ModSwitchConfiguration.Instance.GtaDirChanged), x => ((TextBox) x.Control).Text = x.Model.GtaDir, x => x.Model.GtaDir = ((TextBox) x.Control).Text ?? "");
+    private readonly AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration> gtaModsDirBinder = new AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration>(TextBox.TextProperty, nameof(ModSwitchConfiguration.Instance.GtaModsDirChanged), x => ((TextBox) x.Control).Text = x.Model.GtaModsDir, x => x.Model.GtaModsDir = ((TextBox) x.Control).Text ?? "");
+    private readonly AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration> overwriteBinder = new AutoUpdateAndEventPropertyBinder<ModSwitchConfiguration>(ToggleButton.IsCheckedProperty, nameof(ModSwitchConfiguration.Instance.OverwriteOrIgnoreChanged), x => {
+        bool isChecked = x.Model.OverwriteOrIgnore;
+        ((CheckBox) x.Control).IsChecked = isChecked;
+        ((CheckBox) x.Control).Content = isChecked ? "Mode: overwrite existing files" : "Mode: ignore existing files";
+    }, x => x.Model.OverwriteOrIgnore = ((CheckBox) x.Control).IsChecked ?? false);
+    
     private readonly AsyncRelayCommand browseGtaDirCommand;
     private readonly AsyncRelayCommand browseModsFolderCommand;
     private readonly AsyncRelayCommand loadModsCommand;
     private readonly AsyncRelayCommand unloadModsCommand;
-    private List<(string Path, bool DidNotMove)>? loadedModPaths;
 
     public MainView() {
         this.InitializeComponent();
 
-        this.browseGtaDirCommand = new AsyncRelayCommand(this.BrowseGtaDirAsync);
-        this.browseModsFolderCommand = new AsyncRelayCommand(this.BrowseModsDirAsync);
+        this.browseGtaDirCommand = new AsyncRelayCommand(this.ModSwitchManager.BrowseNewGtaDirAsync);
+        this.browseModsFolderCommand = new AsyncRelayCommand(this.ModSwitchManager.BrowseNewModsDirAsync);
 
-        this.loadModsCommand = new AsyncRelayCommand(this.LoadModsAsync, () => this.loadedModPaths == null && this.DoGtaAndModsDirsExist());
-        this.unloadModsCommand = new AsyncRelayCommand(this.UnloadModsAsync, () => this.loadedModPaths != null && Directory.Exists(this.PART_ModsDir.Text));
+        this.loadModsCommand = new AsyncRelayCommand(this.ModSwitchManager.LoadModsAsync, () => !this.ModSwitchManager.AreModsLoaded && this.ModSwitchManager.DoGtaAndModsDirsExist());
+        this.unloadModsCommand = new AsyncRelayCommand(this.ModSwitchManager.UnloadModsAsync, () => this.ModSwitchManager.AreModsLoaded && this.ModSwitchManager.DoGtaAndModsDirsExist());
 
+        this.ModSwitchManager.AreModsLoadedChanged += sender => {
+            this.loadModsCommand.RaiseCanExecuteChanged();
+            this.unloadModsCommand.RaiseCanExecuteChanged();
+        };
+        
         this.Loaded += OnLoadedMainView;
-
-        this.UpdateCheckBoxText();
-        this.PART_OverwriteOrIgnoreCheckBox.IsChecked = BasicAppConfigOptions.Instance.OverwriteOrIgnore;
-        this.PART_GtaDir.Text = BasicAppConfigOptions.Instance.GtaDir;
-        this.PART_ModsDir.Text = BasicAppConfigOptions.Instance.GtaModsDir;
-        
-        this.PART_GtaDir.TextChanged += (sender, args) => {
-            BasicAppConfigOptions.Instance.GtaDir = ((TextBox) sender!).Text ?? "";
-        };
-        
-        this.PART_ModsDir.TextChanged += (sender, args) => {
-            BasicAppConfigOptions.Instance.GtaModsDir = ((TextBox) sender!).Text ?? "";
-        };
 
         return;
 
@@ -59,174 +56,19 @@ public partial class MainView : UserControl {
             this.PART_UnloadModsButton.Command = this.unloadModsCommand;
         }
     }
-
-    private void UpdateCheckBoxText() {
-        bool isChecked = this.PART_OverwriteOrIgnoreCheckBox.IsChecked ?? false;
-        this.PART_OverwriteOrIgnoreCheckBox.Content = isChecked ? "Mode: overwrite existing files" : "Mode: ignore existing files";
+    
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnAttachedToVisualTree(e);
+        this.gtaDirBinder.Attach(this.PART_GtaDir, ModSwitchConfiguration.Instance);
+        this.gtaModsDirBinder.Attach(this.PART_ModsDir, ModSwitchConfiguration.Instance);
+        this.overwriteBinder.Attach(this.PART_OverwriteOrIgnoreCheckBox, ModSwitchConfiguration.Instance);
     }
 
-    private bool DoGtaAndModsDirsExist() => Directory.Exists(this.PART_GtaDir.Text) && Directory.Exists(this.PART_ModsDir.Text);
-
-    private async Task BrowseGtaDirAsync() {
-        if (await BrowseFolder(this.PART_GtaDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path) {
-            this.PART_GtaDir.Text = path;
-            BasicAppConfigOptions.Instance.StorageManager.SaveArea(BasicAppConfigOptions.Instance);
-        }
-    }
-
-    private async Task BrowseModsDirAsync() {
-        if (await BrowseFolder(this.PART_ModsDir.Text) is IStorageFolder folder && folder.TryGetLocalPath() is string path) {
-            this.PART_ModsDir.Text = path;
-            BasicAppConfigOptions.Instance.StorageManager.SaveArea(BasicAppConfigOptions.Instance);
-        }
-    }
-
-    private static async Task<IStorageFolder?> BrowseFolder(string? initialDir) {
-        if (!(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop))
-            return null;
-
-        IStorageProvider? storage = desktop.MainWindow?.StorageProvider;
-        if (storage == null)
-            return null;
-
-        IStorageFolder? initialFolder = null;
-        try {
-            initialFolder = !string.IsNullOrWhiteSpace(initialDir) ? await storage.TryGetFolderFromPathAsync(initialDir) : null;
-        }
-        catch {
-            // ignored
-        }
-
-        IReadOnlyList<IStorageFolder> list = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions() { SuggestedStartLocation = initialFolder, AllowMultiple = false });
-        return list.Count == 1 ? list[0] : null;
-    }
-
-    private async Task LoadModsAsync() {
-        if (this.loadedModPaths != null || !this.DoGtaAndModsDirsExist()) {
-            this.RaiseCanLoadUnloadExecute();
-            return;
-        }
-
-        string? modsDir = this.PART_ModsDir.Text;
-        Debug.Assert(!string.IsNullOrWhiteSpace(modsDir), "Mods dir was empty or whitespaces");
-
-        string? gtaDir = this.PART_GtaDir.Text;
-        Debug.Assert(!string.IsNullOrWhiteSpace(gtaDir), "Mods dir was empty or whitespaces");
-
-        bool overwriteElseIgnore = this.PART_OverwriteOrIgnoreCheckBox.IsChecked ?? false;
-
-        // Avalonia is pretty shit so no simple way to show errors yet. Would be List<(string, Exception)> for simplicity, string being full path
-
-        List<(string Path, bool DidNotMove)>? paths = new List<(string, bool)>();
-
-        foreach (FileSystemInfo info in new DirectoryInfo(modsDir).EnumerateFileSystemInfos()) {
-            string pathInGtaDir = Path.Combine(gtaDir, info.Name);
-            if (info is FileInfo fileInfo) {
-                if (MoveFile(fileInfo, pathInGtaDir, overwriteElseIgnore, out bool notMoved))
-                    paths.Add((pathInGtaDir, notMoved));
-            }
-            else {
-                DirectoryInfo dirInfo = (DirectoryInfo) info;
-                if (MoveDir(dirInfo, pathInGtaDir, overwriteElseIgnore, out bool notMoved))
-                    paths.Add((pathInGtaDir, notMoved));
-            }
-        }
-
-        this.SetLoadedMods(paths);
-    }
-
-    private async Task UnloadModsAsync() {
-        List<(string Path, bool DidNotMove)>? filesInModsFolder = this.loadedModPaths;
-        if (filesInModsFolder == null || !Directory.Exists(this.PART_ModsDir.Text)) {
-            this.RaiseCanLoadUnloadExecute();
-            return;
-        }
-
-        string? modsDir = this.PART_ModsDir.Text;
-        Debug.Assert(!string.IsNullOrWhiteSpace(modsDir), "Mods dir was empty or whitespaces");
-
-        bool overwriteElseIgnore = this.PART_OverwriteOrIgnoreCheckBox.IsChecked ?? false;
-
-        // Avalonia is pretty shit so no simple way to show errors yet. Would be List<(string, Exception)> for simplicity, string being full path
-        foreach ((string pathInGtaDir, bool didNotMove) in filesInModsFolder) {
-            string fileName = Path.GetFileName(pathInGtaDir);
-            string pathInModsDir = Path.Combine(modsDir, fileName);
-            if (File.Exists(pathInGtaDir)) {
-                MoveFile(pathInGtaDir, pathInModsDir, overwriteElseIgnore, out _);
-            }
-            else if (Directory.Exists(pathInGtaDir)) {
-                MoveDir(pathInGtaDir, pathInModsDir, overwriteElseIgnore, out _);
-            }
-        }
-
-        this.SetLoadedMods(null);
-    }
-
-    private static bool MoveFile(string src, string dst, bool overwrite, out bool didNotMove) {
-        try {
-            // Console.WriteLine($"Moving FILE '{src}' --> '{dst}'");
-            if (File.Exists(dst) && !overwrite) {
-                didNotMove = true;
-                return true;
-            }
-
-            File.Move(src, dst, overwrite);
-            didNotMove = false;
-            return true;
-        }
-        catch {
-            /* ignored */
-            didNotMove = false;
-            return false;
-        }
-    }
-
-    private static bool MoveFile(FileInfo src, string dst, bool overwrite, out bool didNotMove) => MoveFile(src.FullName, dst, overwrite, out didNotMove);
-
-    private static bool MoveDir(string src, string dst, bool overwrite, out bool didNotMove) {
-        if (Directory.Exists(dst)) {
-            if (overwrite) {
-                try {
-                    // Console.WriteLine($"Trying to delete directory for overwrite: '{dst}'");
-                    Directory.Delete(dst);
-                }
-                catch {
-                    didNotMove = false;
-                    return false;
-                }
-            }
-            else {
-                didNotMove = true;
-                return true;
-            }
-        }
-
-        try {
-            // Console.WriteLine($"Moving DIR '{src}' --> '{dst}'");
-            Directory.Move(src, dst);
-            didNotMove = false;
-            return true;
-        }
-        catch {
-            /* ignored */
-            didNotMove = false;
-            return false;
-        }
-    }
-
-    private static bool MoveDir(DirectoryInfo src, string dst, bool overwrite, out bool didNotMove) => MoveDir(src.FullName, dst, overwrite, out didNotMove);
-
-    private void SetLoadedMods(List<(string Path, bool DidNotMove)>? paths) {
-        if (paths != null && this.loadedModPaths != null)
-            throw new InvalidOperationException("Mod paths already loaded");
-
-        this.loadedModPaths = paths;
-        this.RaiseCanLoadUnloadExecute();
-    }
-
-    private void PART_OverwriteOrIgnoreCheckBox_OnIsCheckedChanged(object? sender, RoutedEventArgs e) {
-        this.UpdateCheckBoxText();
-        BasicAppConfigOptions.Instance.OverwriteOrIgnore = ((CheckBox) sender!).IsChecked ?? false;
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e) {
+        base.OnDetachedFromVisualTree(e);
+        this.gtaDirBinder.Detach();
+        this.gtaModsDirBinder.Detach();
+        this.overwriteBinder.Detach();
     }
 
     private void OnTextChangedOnDirTextBox(object? sender, TextChangedEventArgs e) {

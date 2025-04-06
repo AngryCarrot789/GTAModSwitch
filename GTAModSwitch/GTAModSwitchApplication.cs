@@ -105,7 +105,7 @@ public class GTAModSwitchApplication : ApplicationPFX, IFrontEndApplication {
     protected override void RegisterConfigurations() {
         PersistentStorageManager psm = this.PersistentStorageManager;
         psm.Register<ThemeConfigurationOptions>(new ThemeConfigurationOptionsImpl(), "themes", "themes");
-        psm.Register(new BasicAppConfigOptions(), null, "basic");
+        psm.Register(new ModSwitchConfiguration(), null, "basic");
     }
 
     protected override async Task OnPluginsLoaded() {
@@ -163,15 +163,24 @@ public class GTAModSwitchApplication : ApplicationPFX, IFrontEndApplication {
 
 public class StartupManagerFramePFX : IStartupManager {
     public async Task OnApplicationStartupWithArgs(string[] args) {
+        ModSwitchManager? manager = null;
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             MainWindow window = new MainWindow();
+            manager = window.ModSwitchManager;
             desktop.MainWindow = window;
             window.Show();
             
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+
         }
         else if (Application.Current?.ApplicationLifetime is ISingleViewApplicationLifetime singleView) {
-            singleView.MainView = new MainView();
+            MainView view = new MainView();
+            manager = view.ModSwitchManager;
+            singleView.MainView = view;
+        }
+
+        if (manager != null) {
+            await await ApplicationPFX.Instance.Dispatcher.InvokeAsync(manager.ScanAndProcessExistingModFiles, DispatchPriority.Background);
         }
     }
 }

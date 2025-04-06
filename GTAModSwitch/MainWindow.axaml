@@ -14,5 +14,5 @@
             TitleBarBrush="{DynamicResource ABrush.Tone7.Background.Static}"
             FontFamily="{StaticResource FontOxanium}" FontWeight="Medium"
             WindowStartupLocation="CenterScreen">
-    <local:MainView/>
+    <local:MainView x:Name="PART_MainView"/>
 </c:WindowEx>
